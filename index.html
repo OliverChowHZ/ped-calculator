@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PED压力容器分类计算器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #2a5298;
+        }
+        
+        .form-section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            font-size: 13px;
+        }
+        
+        .radio-item:hover {
+            background: #e8f0fe;
+        }
+        
+        .radio-item input[type="radio"] {
+            accent-color: #2a5298;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .radio-item.selected {
+            border-color: #2a5298;
+            background: #e8f0fe;
+        }
+        
+        .checkbox-group {
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            accent-color: #2a5298;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-with-unit input {
+            flex: 1;
+        }
+        
+        .input-with-unit span {
+            color: #666;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .btn-calculate {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            letter-spacing: 2px;
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.3);
+        }
+        
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-header h3 {
+            color: #1e3c72;
+            font-size: 20px;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+        
+        .category-badge .en-text {
+            font-size: 16px;
+            opacity: 0.9;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .category-sep { background: #6c757d; color: white; }
+        .category-i { background: #28a745; color: white; }
+        .category-ii { background: #17a2b8; color: white; }
+        .category-iii { background: #ffc107; color: #333; }
+        .category-iv { background: #dc3545; color: white; }
+        
+        .result-details {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .result-details h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-label .en-text {
+            font-size: 12px;
+            color: #999;
+            display: block;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+            text-align: right;
+            font-size: 14px;
+        }
+        
+        .detail-value .en-text {
+            font-size: 12px;
+            color: #666;
+            display: block;
+            font-weight: normal;
+        }
+        
+        .modules-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f0fe;
+            border-radius: 8px;
+        }
+        
+        .modules-section h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        
+        .modules-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .module-badge {
+            padding: 8px 15px;
+            background: #2a5298;
+            color: white;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .module-badge .en-text {
+            font-size: 11px;
+            opacity: 0.85;
+            display: block;
+            margin-top: 3px;
+        }
+        
+        .note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            font-size: 13px;
+            color: #856404;
+        }
+        
+        .note strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #b6d4fe;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .info-box h4 {
+            color: #0d6efd;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .info-box li {
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer .disclaimer {
+            margin-bottom: 15px;
+        }
+        
+        .footer .author-info {
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            color: #888;
+        }
+        
+        .footer .author-info a {
+            color: #2a5298;
+            text-decoration: none;
+        }
+        
+        .footer .author-info a:hover {
+            text-decoration: underline;
+        }
+        
+        .verification-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d4edda;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .verification-section h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        .verification-section p {
+            font-size: 13px;
+            color: #155724;
+            white-space: pre-line;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .detail-value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PED压力容器分类计算器</h1>
+            <p>压力设备指令 2014/68/EU 分类工具</p>
+        </div>
+        
+        <div class="content">
+            <div class="info-box">
+                <h4>分类程序说明</h4>
+                <ul>
+                    <li>选择设备类型（容器、锅炉、管道或附件）</li>
+                    <li>指定流体状态（气态或液态）和流体组别（危险或非危险）</li>
+                    <li>输入最大允许压力（PS）、容积（V）或公称尺寸（DN）</li>
+                    <li>点击计算按钮确定PED分类</li>
+                </ul>
+            </div>
+            
+            <form id="pedForm">
+                <!-- 设备标识 -->
+                <div class="form-section">
+                    <h3>设备标识</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tagNo">设备位号</label>
+                            <input type="text" id="tagNo" name="tagNo" value="V-001" placeholder="例如：V-001">
+                        </div>
+                        <div class="form-group">
+                            <label for="equipName">设备名称</label>
+                            <input type="text" id="equipName" name="equipName" value="压力容器" placeholder="例如：分离器">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 设备类型 -->
+                <div class="form-section">
+                    <h3>设备类型</h3>
+                    <div class="radio-group" id="typeGroup">
+                        <label class="radio-item selected">
+                            <input type="radio" name="equipType" value="vessel" checked>
+                            容器（设备）
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="equipType" value="generator">
+                            锅炉（火焰加热）
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="equipType" value="piping">
+                            管道
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="equipType" value="pressureAccessory">
+                            压力附件
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="equipType" value="safetyAccessory">
+                            安全附件
+                        </label>
+                    </div>
+                    
+                    <div id="assessmentSection" style="display: none; margin-top: 15px;">
+                        <label style="font-weight: 600; margin-bottom: 8px; display: block;">评估依据（压力附件）</label>
+                        <div class="radio-group" id="assessmentGroup">
+                            <label class="radio-item selected">
+                                <input type="radio" name="assessment" value="volume" checked>
+                                容积（V）
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="assessment" value="dn">
+                                公称尺寸（DN）
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 流体属性 -->
+                <div class="form-section">
+                    <h3>流体属性</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fluidState">流体状态</label>
+                            <select id="fluidState" name="fluidState">
+                                <option value="gaseous">气态（气体或蒸汽）</option>
+                                <option value="liquid">液态</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fluidGroup">流体组别</label>
+                            <select id="fluidGroup" name="fluidGroup">
+                                <option value="1">第1组 - 危险流体（易爆、易燃、有毒、氧化性）</option>
+                                <option value="2">第2组 - 非危险流体（其他所有流体）</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 设计参数 -->
+                <div class="form-section">
+                    <h3>设计参数</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ps">最大允许压力（PS）</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="ps" name="ps" value="10" min="0" step="0.1" placeholder="压力">
+                                <span>bar</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ts">最大允许温度（TS）</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="ts" name="ts" value="100" placeholder="温度">
+                                <span>°C</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" id="volumeGroup">
+                            <label for="volume">最大容积（V）</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="volume" name="volume" value="100" min="0" step="1" placeholder="容积">
+                                <span>升（L）</span>
+                            </div>
+                        </div>
+                        <div class="form-group" id="dnGroup" style="display: none;">
+                            <label for="dn">公称尺寸（DN）</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="dn" name="dn" value="50" min="0" step="1" placeholder="公称尺寸">
+                                <span>mm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 附加信息 -->
+                <div class="form-section">
+                    <h3>附加信息</h3>
+                    <div class="radio-group" id="addInfoGroup">
+                        <label class="radio-item selected">
+                            <input type="radio" name="addInfo" value="none" checked>
+                            标准设备
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="addInfo" value="breathing">
+                            呼吸设备气瓶
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="addInfo" value="extinguisher">
+                            便携式灭火器
+                        </label>
+                        <label class="radio-item">
+                            <input type="radio" name="addInfo" value="cooker">
+                            压力锅
+                        </label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="unstableGas" name="unstableGas">
+                            含不稳定气体（乙炔等）
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-calculate">计算分类</button>
+            </form>
+            
+            <!-- 结果区域 -->
+            <div class="result-section" id="resultSection">
+                <div class="result-header">
+                    <h3>分类结果 / Classification Result</h3>
+                    <div class="category-badge" id="categoryBadge">
+                        <span class="zh-text">Category IV</span>
+                        <span class="en-text">Category IV</span>
+                    </div>
+                </div>
+                
+                <div class="result-details">
+                    <h4>设备详情 / Equipment Details</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">设备位号<span class="en-text">Tag Number</span></span>
+                        <span class="detail-value" id="resultTag">V-001</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">设备名称<span class="en-text">Equipment Name</span></span>
+                        <span class="detail-value" id="resultName">压力容器</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">设备类型<span class="en-text">Equipment Type</span></span>
+                        <span class="detail-value" id="resultType">
+                            <span class="zh-text">容器</span>
+                            <span class="en-text">Vessel</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">适用表格<span class="en-text">Applicable Table</span></span>
+                        <span class="detail-value" id="resultTable">
+                            <span class="zh-text">表格 1</span>
+                            <span class="en-text">Table 1</span>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">PS × V（或 PS × DN）<span class="en-text">PS × V (or PS × DN)</span></span>
+                        <span class="detail-value" id="resultProduct">1000 bar·L</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">流体<span class="en-text">Fluid</span></span>
+                        <span class="detail-value" id="resultFluid">
+                            <span class="zh-text">气态，第1组</span>
+                            <span class="en-text">Gaseous, Group 1</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="modules-section" id="modulesSection">
+                    <h4>适用的符合性评估模块 / Applicable Conformity Assessment Modules</h4>
+                    <div class="modules-list" id="modulesList">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+                
+                <div class="verification-section" id="verificationSection">
+                    <h4>验证信息 / Verification Info</h4>
+                    <p id="verificationText">分类依据：PED 2014/68/EU Annex II</p>
+                </div>
+                
+                <div class="note">
+                    <strong>注意 / Note：</strong>
+                    本分类仅供参考和初步评估。结果应由具备资质的工程师验证和批准。如需正式分类，请查阅压力设备指令 2014/68/EU 并咨询相关公告机构。
+                    <br><br>
+                    This classification is for reference and preliminary assessment only. Results should be verified and approved by a qualified engineer. For official classification, consult the Pressure Equipment Directive 2014/68/EU and relevant notified body.
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="disclaimer">
+                <p>PED分类计算器 | 基于指令 2014/68/EU</p>
+                <p>仅供参考 - 不作为正式认证依据</p>
+            </div>
+            <div class="author-info">
+                <p>Author: OliverChow | Email: <a href="mailto:zhougw@gmail.com">zhougw@gmail.com</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PED分类计算器逻辑
+        // 基于压力设备指令 2014/68/EU Annex II
+        
+        // 分类名称中英文对照
+        const categoryNames = {
+            'SEP': { zh: 'SEP（良好工程实践）', en: 'SEP (Sound Engineering Practice)' },
+            'I': { zh: 'Category I（第一类）', en: 'Category I' },
+            'II': { zh: 'Category II（第二类）', en: 'Category II' },
+            'III': { zh: 'Category III（第三类）', en: 'Category III' },
+            'IV': { zh: 'Category IV（第四类）', en: 'Category IV' }
+        };
+        
+        // 设备类型中英文对照
+        const typeNames = {
+            'vessel': { zh: '容器', en: 'Vessel' },
+            'generator': { zh: '锅炉', en: 'Generator (Fired/Heated)' },
+            'piping': { zh: '管道', en: 'Piping' },
+            'pressureAccessory': { zh: '压力附件', en: 'Pressure Accessory' },
+            'safetyAccessory': { zh: '安全附件', en: 'Safety Accessory' }
+        };
+        
+        // 流体状态中英文对照
+        const fluidStateNames = {
+            'gaseous': { zh: '气态', en: 'Gaseous' },
+            'liquid': { zh: '液态', en: 'Liquid' }
+        };
+        
+        // 流体组别中英文对照
+        const fluidGroupNames = {
+            '1': { zh: '第1组（危险流体）', en: 'Group 1 (Hazardous)' },
+            '2': { zh: '第2组（非危险流体）', en: 'Group 2 (Non-hazardous)' }
+        };
+        
+        // 符合性评估模块中英文对照
+        const modulesByCategory = {
+            'SEP': [
+                { zh: '第4.3条（良好工程实践）', en: 'Article 4.3 (Sound Engineering Practice)' }
+            ],
+            'I': [
+                { zh: '模块 A（内部生产控制）', en: 'Module A (Internal Production Control)' }
+            ],
+            'II': [
+                { zh: '模块 A2（内部控制+监督）', en: 'Module A2 (Internal Control + Supervision)' },
+                { zh: '模块 D1（生产质量保证）', en: 'Module D1 (Production QA)' },
+                { zh: '模块 E1（产品质量保证）', en: 'Module E1 (Product QA)' }
+            ],
+            'III': [
+                { zh: '模块 B + D（型式检验+生产QA）', en: 'Module B + D (Type Exam + Production QA)' },
+                { zh: '模块 B + F（型式检验+产品验证）', en: 'Module B + F (Type Exam + Product Verif.)' },
+                { zh: '模块 B + E（型式检验+产品QA）', en: 'Module B + E (Type Exam + Product QA)' },
+                { zh: '模块 B + C2（型式检验+一致性检查）', en: 'Module B + C2 (Type Exam + Conformity)' },
+                { zh: '模块 H（全面质量保证）', en: 'Module H (Full QA)' }
+            ],
+            'IV': [
+                { zh: '模块 B + D（型式检验+生产QA）', en: 'Module B + D (Type Exam + Production QA)' },
+                { zh: '模块 B + F（型式检验+产品验证）', en: 'Module B + F (Type Exam + Product Verif.)' },
+                { zh: '模块 G（单件验证）', en: 'Module G (Unit Verification)' },
+                { zh: '模块 H1（全面QA+设计审查）', en: 'Module H1 (Full QA + Design Exam)' }
+            ]
+        };
+        
+        // 容器分类阈值（表格1-4）
+        const vesselThresholds = {
+            table1: {
+                sep: 25, cat1: 1000, cat2: 3000, cat3: 10000, minPS: 0.5, minV: 1,
+                name: { zh: '表格 1', en: 'Table 1' }
+            },
+            table2: {
+                sep: 50, cat1: 2000, cat2: 5000, cat3: 10000, minPS: 0.5, minV: 1,
+                name: { zh: '表格 2', en: 'Table 2' }
+            },
+            table3: {
+                sep: 200, cat1: 1000, cat2: 5000, cat3: 10000, minPS: 0.5, minV: 1,
+                name: { zh: '表格 3', en: 'Table 3' }
+            },
+            table4: {
+                sep: 500, cat1: 2000, cat2: 10000, cat3: 50000, minPS: 0.5, minV: 1,
+                maxPS: 10, maxPS_cat4: 1000,
+                name: { zh: '表格 4', en: 'Table 4' }
+            }
+        };
+        
+        // 锅炉阈值（表格5）
+        const generatorThresholds = {
+            table5: {
+                sep: 25, cat1: 100, cat2: 500, cat3: 2500, minPS: 0.5,
+                name: { zh: '表格 5', en: 'Table 5' }
+            }
+        };
+        
+        // 管道阈值（表格6-9）
+        const pipingThresholds = {
+            table6: { 
+                sep: 1000, cat1: 3500, cat2: 10000, cat3: 25000, minPS: 0.5, minDN: 25,
+                name: { zh: '表格 6', en: 'Table 6' }
+            },
+            table7: { 
+                sep: 2000, cat1: 5000, cat2: 10000, cat3: 25000, minPS: 0.5, minDN: 25,
+                name: { zh: '表格 7', en: 'Table 7' }
+            },
+            table8: { 
+                sep: 2000, cat1: 5000, cat2: 10000, cat3: 25000, minPS: 0.5, minDN: 25,
+                name: { zh: '表格 8', en: 'Table 8' }
+            },
+            table9: { 
+                sep: 5000, cat1: 10000, cat2: 25000, cat3: 50000, minPS: 0.5, minDN: 25,
+                name: { zh: '表格 9', en: 'Table 9' }
+            }
+        };
+        
+        // DOM元素
+        const form = document.getElementById('pedForm');
+        const typeRadios = document.querySelectorAll('input[name="equipType"]');
+        const assessmentRadios = document.querySelectorAll('input[name="assessment"]');
+        const assessmentSection = document.getElementById('assessmentSection');
+        const volumeGroup = document.getElementById('volumeGroup');
+        const dnGroup = document.getElementById('dnGroup');
+        const resultSection = document.getElementById('resultSection');
+        
+        // 单选按钮样式
+        document.querySelectorAll('.radio-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                const group = this.closest('.radio-group');
+                group.querySelectorAll('.radio-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            });
+        });
+        
+        // 设备类型变更处理
+        typeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const type = this.value;
+                
+                if (type === 'pressureAccessory') {
+                    assessmentSection.style.display = 'block';
+                } else {
+                    assessmentSection.style.display = 'none';
+                }
+                
+                if (type === 'piping') {
+                    volumeGroup.style.display = 'none';
+                    dnGroup.style.display = 'block';
+                } else if (type === 'pressureAccessory') {
+                    const assessment = document.querySelector('input[name="assessment"]:checked').value;
+                    if (assessment === 'volume') {
+                        volumeGroup.style.display = 'block';
+                        dnGroup.style.display = 'none';
+                    } else {
+                        volumeGroup.style.display = 'none';
+                        dnGroup.style.display = 'block';
+                    }
+                } else {
+                    volumeGroup.style.display = 'block';
+                    dnGroup.style.display = 'none';
+                }
+            });
+        });
+        
+        // 评估依据变更处理
+        assessmentRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'volume') {
+                    volumeGroup.style.display = 'block';
+                    dnGroup.style.display = 'none';
+                } else {
+                    volumeGroup.style.display = 'none';
+                    dnGroup.style.display = 'block';
+                }
+            });
+        });
+        
+        // 计算分类
+        function calculateCategory(data) {
+            let category = 'SEP';
+            let table = null;
+            let product = 0;
+            let verification = '';
+            
+            const ps = parseFloat(data.ps);
+            const volume = parseFloat(data.volume);
+            const dn = parseFloat(data.dn);
+            const fluidState = data.fluidState;
+            const fluidGroup = parseInt(data.fluidGroup);
+            const equipType = data.equipType;
+            const assessment = data.assessment;
+            const addInfo = data.addInfo;
+            const unstableGas = data.unstableGas;
+            
+            // 安全附件始终为Category IV
+            if (equipType === 'safetyAccessory') {
+                return {
+                    category: 'IV',
+                    table: { zh: '第4.1.2条', en: 'Article 4.1.2' },
+                    product: { zh: '不适用', en: 'N/A' },
+                    verification: '安全附件归类为Category IV设备\nSafety accessories are classified as Category IV'
+                };
+            }
+            
+            // 特殊情况处理
+            if (addInfo === 'breathing') {
+                product = ps * volume;
+                if (product > 0) {
+                    category = product <= 3000 ? 'III' : 'IV';
+                }
+                return {
+                    category: category,
+                    table: { zh: '第4.1.2条（特殊情况）', en: 'Article 4.1.2 (Special Case)' },
+                    product: { zh: product.toFixed(1) + ' bar·L', en: product.toFixed(1) + ' bar·L' },
+                    verification: '呼吸设备气瓶 - 最低Category III\nBreathing equipment cylinders - minimum Category III'
+                };
+            }
+            
+            if (addInfo === 'extinguisher') {
+                product = ps * volume;
+                if (product <= 25) category = 'SEP';
+                else if (product <= 50) category = 'I';
+                else if (product <= 100) category = 'II';
+                else if (product <= 500) category = 'III';
+                else category = 'IV';
+                
+                return {
+                    category: category,
+                    table: { zh: '第4.1.2条（特殊情况）', en: 'Article 4.1.2 (Special Case)' },
+                    product: { zh: product.toFixed(1) + ' bar·L', en: product.toFixed(1) + ' bar·L' },
+                    verification: '便携式灭火器分类\nPortable fire extinguisher classification'
+                };
+            }
+            
+            if (addInfo === 'cooker') {
+                product = ps * volume;
+                if (product <= 50) category = 'I';
+                else category = 'II';
+                
+                return {
+                    category: category,
+                    table: { zh: '第4.1.2条（特殊情况）', en: 'Article 4.1.2 (Special Case)' },
+                    product: { zh: product.toFixed(1) + ' bar·L', en: product.toFixed(1) + ' bar·L' },
+                    verification: '压力锅分类\nPressure cooker classification'
+                };
+            }
+            
+            // 标准分类
+            if (equipType === 'vessel' || (equipType === 'pressureAccessory' && assessment === 'volume')) {
+                product = ps * volume;
+                
+                if (fluidState === 'gaseous' && fluidGroup === 1) {
+                    table = vesselThresholds.table1.name;
+                    const t = vesselThresholds.table1;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `气态+第1组流体 / Gas + Group 1\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·L`;
+                } else if (fluidState === 'gaseous' && fluidGroup === 2) {
+                    table = vesselThresholds.table2.name;
+                    const t = vesselThresholds.table2;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `气态+第2组流体 / Gas + Group 2\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·L`;
+                } else if (fluidState === 'liquid' && fluidGroup === 1) {
+                    table = vesselThresholds.table3.name;
+                    const t = vesselThresholds.table3;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `液态+第1组流体 / Liquid + Group 1\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·L`;
+                } else {
+                    table = vesselThresholds.table4.name;
+                    const t = vesselThresholds.table4;
+                    if (ps <= t.maxPS || product <= t.sep) category = 'SEP';
+                    else if (ps > t.maxPS_cat4) category = 'IV';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `液态+第2组流体 / Liquid + Group 2\n阈值 / Thresholds: SEP≤${t.sep}(或PS≤${t.maxPS}bar), I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·L`;
+                }
+                
+                product = { zh: product.toFixed(1) + ' bar·L', en: product.toFixed(1) + ' bar·L' };
+                
+            } else if (equipType === 'generator') {
+                product = ps * volume;
+                table = generatorThresholds.table5.name;
+                const t = generatorThresholds.table5;
+                
+                if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                else if (product <= t.cat1) category = 'I';
+                else if (product <= t.cat2) category = 'II';
+                else if (product <= t.cat3) category = 'III';
+                else category = 'IV';
+                
+                verification = `锅炉 / Fired Boiler\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·L`;
+                product = { zh: product.toFixed(1) + ' bar·L', en: product.toFixed(1) + ' bar·L' };
+                
+            } else if (equipType === 'piping' || (equipType === 'pressureAccessory' && assessment === 'dn')) {
+                product = ps * dn;
+                
+                if (fluidState === 'gaseous' && fluidGroup === 1) {
+                    table = pipingThresholds.table6.name;
+                    const t = pipingThresholds.table6;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `管道-气态+第1组 / Piping - Gas + Group 1\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·mm`;
+                } else if (fluidState === 'gaseous' && fluidGroup === 2) {
+                    table = pipingThresholds.table7.name;
+                    const t = pipingThresholds.table7;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `管道-气态+第2组 / Piping - Gas + Group 2\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·mm`;
+                } else if (fluidState === 'liquid' && fluidGroup === 1) {
+                    table = pipingThresholds.table8.name;
+                    const t = pipingThresholds.table8;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `管道-液态+第1组 / Piping - Liquid + Group 1\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·mm`;
+                } else {
+                    table = pipingThresholds.table9.name;
+                    const t = pipingThresholds.table9;
+                    if (ps < t.minPS || product <= t.sep) category = 'SEP';
+                    else if (product <= t.cat1) category = 'I';
+                    else if (product <= t.cat2) category = 'II';
+                    else if (product <= t.cat3) category = 'III';
+                    else category = 'IV';
+                    verification = `管道-液态+第2组 / Piping - Liquid + Group 2\n阈值 / Thresholds: SEP≤${t.sep}, I≤${t.cat1}, II≤${t.cat2}, III≤${t.cat3} bar·mm`;
+                }
+                
+                product = { zh: product.toFixed(0) + ' bar·mm', en: product.toFixed(0) + ' bar·mm' };
+            }
+            
+            // 不稳定气体例外
+            if (unstableGas && (category === 'I' || category === 'II')) {
+                category = 'III';
+                verification += '\n（不稳定气体升级为Category III / Unstable gas upgraded to Category III）';
+            }
+            
+            return {
+                category: category,
+                table: table,
+                product: product,
+                verification: verification
+            };
+        }
+        
+        // 表单提交
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                tagNo: document.getElementById('tagNo').value,
+                name: document.getElementById('equipName').value,
+                equipType: document.querySelector('input[name="equipType"]:checked').value,
+                assessment: document.querySelector('input[name="assessment"]:checked').value,
+                fluidState: document.getElementById('fluidState').value,
+                fluidGroup: document.getElementById('fluidGroup').value,
+                ps: document.getElementById('ps').value,
+                ts: document.getElementById('ts').value,
+                volume: document.getElementById('volume').value,
+                dn: document.getElementById('dn').value,
+                addInfo: document.querySelector('input[name="addInfo"]:checked').value,
+                unstableGas: document.getElementById('unstableGas').checked
+            };
+            
+            const result = calculateCategory(formData);
+            
+            // 更新结果显示
+            document.getElementById('resultTag').textContent = formData.tagNo;
+            document.getElementById('resultName').textContent = formData.name;
+            
+            // 设备类型（中英文）
+            const typeName = typeNames[formData.equipType];
+            document.getElementById('resultType').innerHTML = 
+                `<span class="zh-text">${typeName.zh}</span><span class="en-text">${typeName.en}</span>`;
+            
+            // 适用表格（中英文）
+            if (result.table) {
+                document.getElementById('resultTable').innerHTML = 
+                    `<span class="zh-text">${result.table.zh}</span><span class="en-text">${result.table.en}</span>`;
+            }
+            
+            // PS×V（中英文）
+            if (result.product) {
+                document.getElementById('resultProduct').innerHTML = 
+                    `<span class="zh-text">${result.product.zh}</span><span class="en-text">${result.product.en}</span>`;
+            }
+            
+            // 流体（中英文）
+            const fluidStateName = fluidStateNames[formData.fluidState];
+            const fluidGroupName = fluidGroupNames[formData.fluidGroup];
+            document.getElementById('resultFluid').innerHTML = 
+                `<span class="zh-text">${fluidStateName.zh}，${fluidGroupName.zh}</span><span class="en-text">${fluidStateName.en}, ${fluidGroupName.en}</span>`;
+            
+            // 更新分类徽章（中英文对照）
+            const badge = document.getElementById('categoryBadge');
+            const catName = categoryNames[result.category];
+            badge.innerHTML = `<span class="zh-text">${catName.zh}</span><span class="en-text">${catName.en}</span>`;
+            badge.className = 'category-badge';
+            if (result.category === 'SEP') badge.classList.add('category-sep');
+            else if (result.category === 'I') badge.classList.add('category-i');
+            else if (result.category === 'II') badge.classList.add('category-ii');
+            else if (result.category === 'III') badge.classList.add('category-iii');
+            else if (result.category === 'IV') badge.classList.add('category-iv');
+            
+            // 更新模块（中英文对照）
+            const modulesList = document.getElementById('modulesList');
+            const modules = modulesByCategory[result.category] || [];
+            modulesList.innerHTML = modules.map(m => 
+                `<span class="module-badge">${m.zh}<span class="en-text">${m.en}</span></span>`
+            ).join('');
+            
+            // 更新验证信息
+            document.getElementById('verificationText').textContent = 
+                `分类依据 / Classification Basis: PED 2014/68/EU Annex II\n\n${result.verification}`;
+            
+            // 显示结果区域
+            resultSection.classList.add('show');
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // 初始化表单状态
+        document.querySelector('input[name="equipType"]:checked').dispatchEvent(new Event('change'));
+    </script>
+</body>
+</html>
